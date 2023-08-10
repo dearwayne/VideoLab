@@ -24,7 +24,7 @@ extension Source {
     public func texture(at time: CMTime) -> Texture? {
         return nil
     }
-    func canBeConvertedToVideo() -> Bool {
+    public func canBeConvertedToVideo() -> Bool {
         return false
     }
 }
