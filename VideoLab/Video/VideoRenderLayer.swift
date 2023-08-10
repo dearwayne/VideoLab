@@ -97,7 +97,9 @@ extension RenderLayer {
         if operations.count > 0 {
             return true
         }
-        
+        if let canBeConvertToVideo = source?.canBeConvertedToVideo(),canBeConvertToVideo {
+            return true
+        }
         return false
     }
 }

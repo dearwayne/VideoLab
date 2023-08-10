@@ -94,6 +94,10 @@ class LayerCompositor {
                 }
             }
             
+            if intersectingVideoRenderLayers.isEmpty {
+                Texture.clearTexture(groupTexture)
+            }
+            
             renderTextureLayer(groupTexture)
             groupTexture.unlock()
         } else if videoRenderLayer.trackID != kCMPersistentTrackID_Invalid {

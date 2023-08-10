@@ -16,10 +16,15 @@ public protocol Source {
     func load(completion: @escaping (NSError?) -> Void)
     func tracks(for type: AVMediaType) -> [AVAssetTrack]
     func texture(at time: CMTime) -> Texture?
+    
+    func canBeConvertedToVideo() -> Bool
 }
 
 extension Source {
     public func texture(at time: CMTime) -> Texture? {
         return nil
+    }
+    func canBeConvertedToVideo() -> Bool {
+        return false
     }
 }
