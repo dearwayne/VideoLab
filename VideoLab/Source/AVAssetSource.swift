@@ -11,6 +11,8 @@ public class AVAssetSource: Source,Scaleable {
     public var speed: Float64 = 1.0
     public var scaledDuration: CMTime = .zero
     
+    private var isMuted = false
+    
     public func setSpeed(_ spd: Float64) {
         guard spd > 0 else { return }
         speed = spd
@@ -23,6 +25,11 @@ public class AVAssetSource: Source,Scaleable {
         self.asset = asset
         duration = asset.duration
         selectedTimeRange = CMTimeRange(start: .zero, duration: duration)
+    }
+    
+    // 视频静音
+    public func setMute(_ mute:Bool) {
+        self.isMuted = mute
     }
     
     // MARK: - Source
@@ -82,6 +89,8 @@ public class AVAssetSource: Source,Scaleable {
     
     public func tracks(for type: AVMediaType) -> [AVAssetTrack] {
         guard let asset = asset else { return [] }
+        // 视频静音
+        if isMuted,type == .audio { return [] }
         return asset.tracks(withMediaType: type)
     }
 }
