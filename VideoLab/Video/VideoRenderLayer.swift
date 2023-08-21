@@ -37,6 +37,11 @@ class VideoRenderLayer {
         if let compositionTrack = compositionTrack {
             do {
                 try compositionTrack.insertTimeRange(source.selectedTimeRange, of:assetTrack , at: timeRangeInTimeline.start)
+                
+                // 变速
+                if let scaleResource = source as? Scaleable,scaleResource.speed != 1 {
+                    compositionTrack.scaleTimeRange(source.selectedTimeRange, toDuration: scaleResource.scaledDuration)
+                }
             } catch {
                 // TODO: handle Error
             }

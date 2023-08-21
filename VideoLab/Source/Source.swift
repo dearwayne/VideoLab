@@ -8,6 +8,14 @@
 
 import AVFoundation
 
+public protocol Scaleable {
+    // 变速
+    var speed:Float64 {get}
+    var scaledDuration: CMTime {get}
+    
+    func setSpeed(_ speed: Float64)
+}
+
 public protocol Source {
     var selectedTimeRange: CMTimeRange { get set }
     var duration: CMTime { get set }

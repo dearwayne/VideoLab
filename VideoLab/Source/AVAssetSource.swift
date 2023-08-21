@@ -7,19 +7,32 @@
 
 import AVFoundation
 
-public class AVAssetSource: Source {
+public class AVAssetSource: Source,Scaleable {
+    public var speed: Float64 = 1.0
+    public var scaledDuration: CMTime = .zero
+    
+    public func setSpeed(_ spd: Float64) {
+        guard spd > 0 else { return }
+        speed = spd
+        scaledDuration = CMTimeMultiplyByFloat64(duration, multiplier: 1.0 / spd)
+    }
+    
     private var asset: AVAsset?
     
     public init(asset: AVAsset) {
         self.asset = asset
-        selectedTimeRange = CMTimeRange.zero
-        duration = CMTime.zero
+        duration = asset.duration
+        selectedTimeRange = CMTimeRange(start: .zero, duration: duration)
     }
     
     // MARK: - Source
     public var selectedTimeRange: CMTimeRange
     
-    public var duration: CMTime
+    public var duration: CMTime {
+        didSet {
+            scaledDuration = CMTimeMultiplyByFloat64(duration, multiplier: 1.0 / speed)
+        }
+    }
     
     public var isLoaded: Bool = false
     
