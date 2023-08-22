@@ -8,8 +8,14 @@
 import AVFoundation
 import UIKit
 
-public class ImageSource: Source {
-    private var cgImage: CGImage?
+open class ImageSource: Source {
+    public private(set) var cgImage: CGImage?
+    public var image:UIImage? {
+        if let cgImage = cgImage {
+            return UIImage(cgImage: cgImage)
+        }
+        return nil
+    }
     var texture: Texture?
 
     public init(cgImage: CGImage?) {
