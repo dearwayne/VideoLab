@@ -40,7 +40,9 @@ class VideoRenderLayer {
                 
                 // 变速
                 if let scaleResource = source as? Scaleable,scaleResource.speed != 1 {
-                    compositionTrack.scaleTimeRange(source.selectedTimeRange, toDuration: scaleResource.scaledDuration)
+                    let duration = source.selectedTimeRange.duration
+                    let timeRange = CMTimeRange(start: timeRangeInTimeline.start, duration: duration)
+                    compositionTrack.scaleTimeRange(timeRange, toDuration: scaleResource.scaledDuration)
                 }
             } catch {
                 // TODO: handle Error
