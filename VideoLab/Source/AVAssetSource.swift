@@ -8,7 +8,7 @@
 import AVFoundation
 
 public class AVAssetSource: Source,Scaleable {
-    public var speed: Float64 = 1.0
+    public private(set) var speed: Float64 = 1.0
     public var scaledDuration: CMTime = .zero
     
     private var isMuted = false
@@ -24,6 +24,7 @@ public class AVAssetSource: Source,Scaleable {
     public init(asset: AVAsset) {
         self.asset = asset
         duration = asset.duration
+        scaledDuration = CMTimeMultiplyByFloat64(duration, multiplier: 1.0 / speed)
         selectedTimeRange = CMTimeRange(start: .zero, duration: duration)
     }
     
