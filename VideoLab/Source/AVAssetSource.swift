@@ -7,16 +7,16 @@
 
 import AVFoundation
 
-public class AVAssetSource: Source,Scaleable {
-    public private(set) var speed: Float64 = 1.0
-    public var scaledDuration: CMTime = .zero
+public class AVAssetSource: Source,Rateable {
+    public private(set) var rate: Float64 = 1.0
+    public var ratedDuration: CMTime = .zero
     
     private var isMuted = false
     
-    public func setSpeed(_ spd: Float64) {
-        guard spd > 0 else { return }
-        speed = spd
-        scaledDuration = CMTimeMultiplyByFloat64(duration, multiplier: 1.0 / spd)
+    public func setRate(_ rate: Float64) {
+        guard rate > 0 else { return }
+        self.rate = rate
+        ratedDuration = CMTimeMultiplyByFloat64(duration, multiplier: 1.0 / rate)
     }
     
     private var asset: AVAsset?
@@ -24,7 +24,7 @@ public class AVAssetSource: Source,Scaleable {
     public init(asset: AVAsset) {
         self.asset = asset
         duration = asset.duration
-        scaledDuration = CMTimeMultiplyByFloat64(duration, multiplier: 1.0 / speed)
+        ratedDuration = CMTimeMultiplyByFloat64(duration, multiplier: 1.0 / rate)
         selectedTimeRange = CMTimeRange(start: .zero, duration: duration)
     }
     
@@ -38,7 +38,7 @@ public class AVAssetSource: Source,Scaleable {
     
     public var duration: CMTime {
         didSet {
-            scaledDuration = CMTimeMultiplyByFloat64(duration, multiplier: 1.0 / speed)
+            ratedDuration = CMTimeMultiplyByFloat64(duration, multiplier: 1.0 / rate)
         }
     }
     

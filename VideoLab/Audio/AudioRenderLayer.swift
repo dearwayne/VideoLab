@@ -43,10 +43,10 @@ class AudioRenderLayer {
                 try compositionTrack.insertTimeRange(source.selectedTimeRange, of:assetTrack , at: timeRangeInTimeline.start)
                 
                 // 变速
-                if let scaleResource = source as? Scaleable,scaleResource.speed != 1 {
+                if let scaleResource = source as? Rateable,scaleResource.rate != 1 {
                     let duration = source.selectedTimeRange.duration
                     let timeRange = CMTimeRange(start: timeRangeInTimeline.start, duration: duration)
-                    compositionTrack.scaleTimeRange(timeRange, toDuration: scaleResource.scaledDuration)
+                    compositionTrack.scaleTimeRange(timeRange, toDuration: scaleResource.ratedDuration)
                 }
             } catch {
                 // TODO: handle Error

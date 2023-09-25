@@ -8,12 +8,12 @@
 
 import AVFoundation
 
-public protocol Scaleable {
+public protocol Rateable {
     // 变速
-    var speed:Float64 {get}
-    var scaledDuration: CMTime {get}
+    var rate:Float64 {get}
+    var ratedDuration: CMTime {get}
     
-    func setSpeed(_ speed: Float64)
+    func setRate(_ speed: Float64)
 }
 
 public protocol Source {
