@@ -7,6 +7,7 @@
 //
 
 import AVFoundation
+import MetalPerformanceShaders
 
 class LayerCompositor {
     let passthrough = Passthrough()
@@ -106,9 +107,30 @@ class LayerCompositor {
                 return
             }
             
-            guard let videoTexture = bgraVideoTexture(from: pixelBuffer,
+            guard var videoTexture = bgraVideoTexture(from: pixelBuffer,
                                                       preferredTransform: videoRenderLayer.preferredTransform) else {
                 return
+            }
+            
+            // 缩放变换
+            if let source = videoRenderLayer.renderLayer.source,
+               let scaleTransformable = source as? ScaleTransformable,
+               var scaleTransform = scaleTransformable.scaleTransform,
+               let commandBuffer = sharedMetalRenderingDevice.commandQueue.makeCommandBuffer()
+            {
+                let bufferWidth = CVPixelBufferGetWidth(pixelBuffer)
+                let bufferHeight = CVPixelBufferGetHeight(pixelBuffer)
+                let tempTexture = Texture.makeTexture(width: bufferWidth, height: bufferHeight)!
+
+                let filter = MPSImageLanczosScale(device: sharedMetalRenderingDevice.device)
+                withUnsafePointer(to: &scaleTransform) { (transformPtr: UnsafePointer<MPSScaleTransform>) -> () in
+                    filter.scaleTransform = transformPtr
+                    filter.encode(commandBuffer: commandBuffer, sourceTexture: videoTexture.texture, destinationTexture: tempTexture.texture)
+                }
+                commandBuffer.commit()
+                commandBuffer.waitUntilCompleted()
+                
+                videoTexture = tempTexture
             }
             
             renderTextureLayer(videoTexture)

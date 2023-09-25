@@ -6,8 +6,11 @@
 //
 
 import AVFoundation
+import MetalPerformanceShaders
 
-public class AVAssetSource: Source,Rateable {
+public class AVAssetSource: Source,Rateable,ScaleTransformable {
+    public var scaleTransform: MPSScaleTransform?
+    
     public private(set) var rate: Float64 = 1.0
     public var ratedDuration: CMTime = .zero
     

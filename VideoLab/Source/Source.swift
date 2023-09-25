@@ -7,6 +7,11 @@
 //
 
 import AVFoundation
+import MetalPerformanceShaders
+
+public protocol ScaleTransformable {
+    var scaleTransform:MPSScaleTransform? { get set }
+}
 
 public protocol Rateable {
     // 变速
