@@ -16,6 +16,9 @@ public class AVAssetSource: Source,Rateable,ScaleTransformable {
     
     private var isMuted = false
     
+    // 视频音量 0: 静音 100：正常 大于100 放大音量, 默认为空，不改变原视频音量
+    public var volume:Int?
+    
     public func setRate(_ rate: Float64) {
         guard rate > 0 else { return }
         self.rate = rate
