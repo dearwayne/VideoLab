@@ -22,7 +22,7 @@ public class AVAssetSource: Source,Rateable,ScaleTransformable {
         ratedDuration = CMTimeMultiplyByFloat64(duration, multiplier: 1.0 / rate)
     }
     
-    private var asset: AVAsset?
+    public private(set) var asset: AVAsset?
     
     public init(asset: AVAsset) {
         self.asset = asset
