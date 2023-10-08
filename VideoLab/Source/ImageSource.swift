@@ -9,7 +9,11 @@ import AVFoundation
 import UIKit
 
 open class ImageSource: Source {
-    public private(set) var cgImage: CGImage?
+    public var cgImage: CGImage? {
+        didSet {
+            isLoaded = false
+        }
+    }
     public var image:UIImage? {
         if let cgImage = cgImage {
             return UIImage(cgImage: cgImage)
