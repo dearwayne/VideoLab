@@ -10,13 +10,32 @@ import MetalPerformanceShaders
 
 public class AVAssetSource: Source,Rateable,ScaleTransformable {
     public var scaleTransform: MPSScaleTransform?
+    public var renderSize: CGSize = .zero {
+        didSet {
+            updateScaleTransform()
+        }
+    }
     
+    private func updateScaleTransform() {
+        guard let size = asset?.size,
+              size.width > 0,
+              size.height > 0,
+              renderSize != size
+        else { return }
+        
+        let scale = max(renderSize.width/size.width,renderSize.height/size.height)
+        let translateX = (size.width * scale - renderSize.width) / 2
+        let translateY = (size.height * scale - renderSize.height) / 2
+        
+        scaleTransform = MPSScaleTransform(scaleX: scale, scaleY: scale, translateX: translateX, translateY: translateY)
+    }
+
     public private(set) var rate: Float64 = 1.0
     public var ratedDuration: CMTime = .zero
     
     private var isMuted = false
     
-    // 视频音量 0: 静音 100：正常 大于100 放大音量, 默认为空，不改变原视频音量
+    // 视频音量 0: 静音 100：正常 大于100 放大音量
     public var volume:Int?
     
     public func setRate(_ rate: Float64) {
@@ -32,13 +51,14 @@ public class AVAssetSource: Source,Rateable,ScaleTransformable {
         duration = asset.duration
         ratedDuration = CMTimeMultiplyByFloat64(duration, multiplier: 1.0 / rate)
         selectedTimeRange = CMTimeRange(start: .zero, duration: duration)
+        renderSize = asset.size ?? .zero
     }
     
     // 视频静音
     public func setMute(_ mute:Bool) {
         self.isMuted = mute
     }
-    
+
     // MARK: - Source
     public var selectedTimeRange: CMTimeRange
     
@@ -101,3 +121,5 @@ public class AVAssetSource: Source,Rateable,ScaleTransformable {
         return asset.tracks(withMediaType: type)
     }
 }
+
+

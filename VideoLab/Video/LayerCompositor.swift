@@ -80,9 +80,11 @@ class LayerCompositor {
             // Layer group
             let textureWidth = outputTexture.width
             let textureHeight = outputTexture.height
+            
             guard let groupTexture = sharedMetalRenderingDevice.textureCache.requestTexture(width: textureWidth, height: textureHeight) else {
                 return
             }
+            
             groupTexture.lock()
             
             // Filter layers that intersect with the composite time. Iterate through intersecting layers to render each layer
@@ -94,7 +96,8 @@ class LayerCompositor {
                     renderLayer(subVideoRenderLayer, outputTexture: groupTexture, enableOutputTextureRead: enableOutputTextureRead, for: request)
                 }
             }
-            
+
+            // 修正没有图层了还一直渲染旧内容
             if intersectingVideoRenderLayers.isEmpty {
                 Texture.clearTexture(groupTexture)
             }
@@ -112,18 +115,28 @@ class LayerCompositor {
                 return
             }
             
-            // 缩放变换
+            // 裁剪视频
             if let source = videoRenderLayer.renderLayer.source,
                let scaleTransformable = source as? ScaleTransformable,
-               var scaleTransform = scaleTransformable.scaleTransform,
+               let scaleTransform = scaleTransformable.scaleTransform,
                let commandBuffer = sharedMetalRenderingDevice.commandQueue.makeCommandBuffer()
             {
-                let bufferWidth = CVPixelBufferGetWidth(pixelBuffer)
-                let bufferHeight = CVPixelBufferGetHeight(pixelBuffer)
+                var bufferWidth = CVPixelBufferGetWidth(pixelBuffer)
+                var bufferHeight = CVPixelBufferGetHeight(pixelBuffer)
+                
+                if scaleTransformable.renderSize != .zero {
+                    bufferWidth = Int(scaleTransformable.renderSize.width)
+                    bufferHeight = Int(scaleTransformable.renderSize.height)
+                }
+                
                 let tempTexture = Texture.makeTexture(width: bufferWidth, height: bufferHeight)!
 
+                var _scaleTransform = MPSScaleTransform(scaleX: scaleTransform.scaleX,
+                                                        scaleY: scaleTransform.scaleY,
+                                                        translateX: -scaleTransform.translateX,
+                                                        translateY: -scaleTransform.translateY)
                 let filter = MPSImageLanczosScale(device: sharedMetalRenderingDevice.device)
-                withUnsafePointer(to: &scaleTransform) { (transformPtr: UnsafePointer<MPSScaleTransform>) -> () in
+                withUnsafePointer(to: &_scaleTransform) { (transformPtr: UnsafePointer<MPSScaleTransform>) -> () in
                     filter.scaleTransform = transformPtr
                     filter.encode(commandBuffer: commandBuffer, sourceTexture: videoTexture.texture, destinationTexture: tempTexture.texture)
                 }
@@ -233,4 +246,5 @@ class LayerCompositor {
         blendOperation.renderTexture(outputTexture)
     }
 }
+
 

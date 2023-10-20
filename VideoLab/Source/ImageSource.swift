@@ -7,25 +7,68 @@
 
 import AVFoundation
 import UIKit
+import MetalPerformanceShaders
 
-open class ImageSource: Source {
-    public var cgImage: CGImage? {
+public class ImageSource: Source,ScaleTransformable {
+    public var scaleTransform: MPSScaleTransform? {
         didSet {
             isLoaded = false
         }
     }
+    public var renderSize: CGSize = .zero {
+        didSet {
+            isLoaded = false
+            updateScaleTransform()
+        }
+    }
+    
+    public var renderImage:UIImage? {
+        var _renderImage = image
+        if let image = image,let scaleTransform = scaleTransform {
+            let size = image.size
+            let newSize = CGSize(width: size.width * scaleTransform.scaleX, height: size.height * scaleTransform.scaleY)
+            let newImage = image.resize(to: newSize,contentMode: .scaleToFill)
+            let renderRect = CGRect(origin: CGPoint(x: scaleTransform.translateX, y: scaleTransform.translateY), size: renderSize)
+            _renderImage = newImage.crop(rect: renderRect)
+        }
+        return _renderImage
+    }
+    
+    private func updateScaleTransform() {
+        guard let size = image?.size,
+              size.width > 0,
+              size.height > 0,
+              renderSize != size
+        else { return }
+        
+        let scale = max(renderSize.width / size.width,renderSize.height / size.width)
+        let translateX = (size.width * scale - renderSize.width) / 2
+        let translateY = (size.height * scale - renderSize.height) / 2
+        
+        scaleTransform = MPSScaleTransform(scaleX: scale, scaleY: scale, translateX: translateX, translateY: translateY)
+    }
+
+    public var cgImage: CGImage? {
+        didSet {
+            isLoaded = false
+            updateScaleTransform()
+        }
+    }
+    
     public var image:UIImage? {
         if let cgImage = cgImage {
             return UIImage(cgImage: cgImage)
         }
         return nil
     }
+    
     var texture: Texture?
 
     public init(cgImage: CGImage?) {
         self.cgImage = cgImage
         duration = CMTime(seconds: 3, preferredTimescale: 600) // Default duration
         selectedTimeRange = CMTimeRangeMake(start: CMTime.zero, duration: duration)
+        renderSize = image?.size ?? .zero
     }
     
     public init() {
@@ -71,10 +114,13 @@ open class ImageSource: Source {
         defer {
             isLoaded = true
         }
-        guard let cgImage = cgImage else {
+        
+        guard let cgimage = renderImage?.cgImage else {
             return nil
         }
-        texture = Texture.makeTexture(cgImage: cgImage)
+        
+        texture = Texture.makeTexture(cgImage: cgimage)
         return texture
     }
 }
+

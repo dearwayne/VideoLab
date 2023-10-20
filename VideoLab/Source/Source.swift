@@ -11,6 +11,7 @@ import MetalPerformanceShaders
 
 public protocol ScaleTransformable {
     var scaleTransform:MPSScaleTransform? { get set }
+    var renderSize:CGSize { get set }
 }
 
 public protocol Rateable {
