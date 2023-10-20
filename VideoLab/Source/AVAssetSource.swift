@@ -23,9 +23,11 @@ public class AVAssetSource: Source,Rateable,ScaleTransformable {
               renderSize != size
         else { return }
         
-        let scale = max(renderSize.width/size.width,renderSize.height/size.height)
-        let translateX = (size.width * scale - renderSize.width) / 2
-        let translateY = (size.height * scale - renderSize.height) / 2
+        let scaledSize = size.minSize(inner: renderSize)
+        let scale = max(scaledSize.width / size.width,scaledSize.height / size.height)
+        
+        let translateX = (scaledSize.width - renderSize.width) / 2
+        let translateY = (scaledSize.height - renderSize.height) / 2
         
         scaleTransform = MPSScaleTransform(scaleX: scale, scaleY: scale, translateX: translateX, translateY: translateY)
     }
